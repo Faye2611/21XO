@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Accessibility Seat Assistant",
+  "version": "0.1",
+  "description": "Voice-based seat selection assistant",
+  "permissions": ["activeTab"],
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"]
+  }]
+}
