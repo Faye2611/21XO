@@ -32,7 +32,9 @@ demo/mockVenue.html
 5. Select the `extension/` folder
 
 ### Step 3: Use the assistant
-- Click "Voice Assistance"
-- Click the mic button to speak to the AI
+- Press Alt+S to open panel
+- Click "Scan Seats"
+- Click "Recommend"
+- Or press "Start Listening"
 
 No API keys required.
