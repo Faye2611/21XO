@@ -1,0 +1,52 @@
+// test html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Voice Assistant Test</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    button { font-size: 16px; padding: 10px; }
+    #log { margin-top: 20px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+
+<h2>Person 4 — Voice Test</h2>
+
+<button id="mic">🎤 Start Listening</button>
+
+<div id="log"></div>
+
+<script type="module">
+  import { startListening, interpret } from "./voice.js";
+
+  const log = (msg) => {
+    document.getElementById("log").textContent += msg + "\n";
+  };
+
+  let weights = {
+    distance: 0.2,
+    centrality: 0.2,
+    aisle: 0.2,
+    price: 0.2,
+    avoidObstructed: 0.2
+  };
+
+  document.getElementById("mic").onclick = () => {
+    startListening((text) => {
+      log("HEARD: " + text);
+      const result = interpret(text, weights);
+      log("RESULT: " + JSON.stringify(result, null, 2));
+
+      if (result.weights) {
+        weights = result.weights;
+        log("UPDATED WEIGHTS: " + JSON.stringify(weights));
+      }
+    });
+  };
+</script>
+
+</body>
+</html>
