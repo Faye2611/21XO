@@ -16,7 +16,7 @@ seat-assistant/
 ├─ demo/             # Mock ticket site
 ├─ logic/            # Seat extraction & ranking
 ├─ voice/            # Speech recognition
-└─ README.md
+README.md
 
 ## How to Run (No Setup Required)
 
