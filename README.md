@@ -12,7 +12,7 @@ Because this tool relies on loading local JavaScript modules and templates, it m
 Open your terminal in the `seat-assistant` root folder (e.g. `cd seat-assistant`) and start a server. Use whichever tool you prefer:
 
 * **Option A (Python):** Run `python -m http.server 8000`
-* **Option B (VS Code):** Click the **"Go Live"** button (defaults to port 5500)
+* **Option B (VS Code):** Click the **"Go Live"** button after installing live server extension (defaults to port 5500)
 * **Option C (Node.js):** Run `npx serve`
 
 ### 2. Open the Demo
