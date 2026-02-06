@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Accessibility Seat Assistant</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #111827;
+        --border: #334155;
+        --text: #e5e7eb;
+        --accent: #e3f7f7;
+        --focus: #facc15;
+      }
+
+      @font-face {
+        font-family: "Dyslexie";
+        src: url("Dyslexie-Regular.woff2") format("woff2");
+      }
+
+      #seat-assistant {
+        font-family: "Dyslexie", system-ui, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+      }
+
+      #assistant-toggle-btn {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: fit-content;
+        padding: 16px 24px;
+        background: #e3f7f7;
+        color: #020617;
+        border: none;
+        border-radius: 999px;
+        font-size: 20px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      #assistant-toggle-btn:focus {
+        outline: 3px solid var(--focus);
+      }
+
+      /* High-contrast and large UI modes */
+      .high-contrast {
+        background: #000 !important;
+        color: #fff !important;
+      }
+
+      .high-contrast button {
+        background: #fff !important;
+        color: #000 !important;
+        border: 2px solid #000;
+      }
+
+      .large-ui button {
+        font-size: 18px;
+        padding: 16px;
+      }
+
+      .large-ui .result {
+        font-size: 16px;
+        padding: 16px;
+      }
+
+      /* Transcript */
+      #transcript {
+        margin-top: 12px;
+        padding: 8px;
+        max-height: 140px;
+        overflow-y: auto;
+        background: #020617;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 13px;
+      }
+
+      .transcript-line {
+        margin-bottom: 6px;
+        line-height: 1.4;
+      }
+
+      .transcript-line.user {
+        color: #a5f3fc;
+      }
+
+      .transcript-line.assistant {
+        color: #e5e7eb;
+      }
+
+      /* Overlay */
+      #seat-assistant {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 360px;
+        height: 100vh;
+        background: var(--panel);
+        color: var(--text);
+        border-left: 2px solid var(--border);
+        padding: 16px;
+        display: none;
+        z-index: 9999;
+      }
+
+      #seat-assistant.active {
+        display: block;
+      }
+
+      h2 {
+        font-size: 18px;
+        margin-top: 0;
+      }
+
+      .status {
+        margin: 8px 0;
+        font-size: 14px;
+        color: #cbd5f5;
+      }
+
+      button {
+        width: 100%;
+        margin: 6px 0;
+        padding: 10px;
+        background: #1f2933;
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      button:focus {
+        outline: 3px solid var(--focus);
+      }
+
+      button.primary {
+        background: var(--accent);
+        color: #020617;
+        font-weight: 600;
+      }
+
+      /* Results */
+      .results {
+        margin-top: 12px;
+        border-top: 1px solid var(--border);
+        padding-top: 10px;
+      }
+
+      .result {
+        padding: 10px;
+        margin-bottom: 6px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .result[aria-selected="true"] {
+        background: #1e293b;
+        border-color: var(--accent);
+      }
+
+      .result:focus {
+        outline: 3px solid var(--focus);
+      }
+
+      /* Screen-reader only */
+      .sr-only {
+        position: absolute;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <button
+      id="assistant-toggle-btn"
+      aria-controls="seat-assistant"
+      aria-expanded="false"
+    >
+      Seat Assistant
+    </button>
+
+    <!-- Assistant Panel -->
+    <aside
+      id="seat-assistant"
+      role="dialog"
+      class="large-ui"
+      aria-labelledby="assistant-title"
+      aria-describedby="assistant-status"
+    >
+      <h2 id="assistant-title">Accessibility Seat Assistant</h2>
+
+      <section aria-labelledby="accessibility-settings">
+        <h3 id="accessibility-settings">Accessibility preferences</h3>
+
+        <label>
+          <input type="checkbox" id="high-contrast-toggle" />
+          High contrast mode
+        </label>
+      </section>
+
+      <!-- Live region -->
+      <div
+        id="assistant-status"
+        class="status"
+        role="status"
+        aria-live="polite"
+      >
+        Seat assistant activated.
+      </div>
+
+      <button class="primary" id="listen-btn">Start Listening</button>
+
+      <button id="scan-btn">Scan Seats</button>
+
+      <button id="recommend-btn">Recommend Seats</button>
+
+      <div
+        id="transcript"
+        aria-label="Conversation transcript"
+        role="log"
+        aria-live="polite"
+      >
+        <div class="transcript-line assistant">
+          Assistant: Seat assistant ready.
+        </div>
+      </div>
+
+      <div class="results" role="listbox" aria-label="Seat recommendations">
+        <div class="result" tabindex="0" role="option" aria-selected="false">
+          Option 1 — Section B, Row G, Seat 14
+        </div>
+        <div class="result" tabindex="-1" role="option" aria-selected="false">
+          Option 2 — Section C, Row F, Seat 8
+        </div>
+        <div class="result" tabindex="-1" role="option" aria-selected="false">
+          Option 3 — Section D, Row H, Seat 22
+        </div>
+      </div>
+    </aside>
+
+    <script>
+      const panel = document.getElementById("seat-assistant");
+      const status = document.getElementById("assistant-status");
+      const results = Array.from(document.querySelectorAll(".result"));
+
+      let activeIndex = 0;
+
+      /* Toggle panel (Alt + S) */
+      document.addEventListener("keydown", (e) => {
+        if (e.altKey && e.key.toLowerCase() === "s") {
+          e.preventDefault();
+          panel.classList.toggle("active");
+          announce(
+            panel.classList.contains("active")
+              ? "Seat assistant activated."
+              : "Seat assistant closed.",
+          );
+          if (panel.classList.contains("active")) {
+            document.getElementById("listen-btn").focus();
+          }
+        }
+      });
+
+      function announce(message) {
+        status.textContent = message;
+        addTranscriptLine("assistant", message);
+      }
+
+      /* Keyboard navigation for results */
+      function updateSelection(newIndex) {
+        results.forEach((r, i) => {
+          r.setAttribute("aria-selected", i === newIndex);
+          r.tabIndex = i === newIndex ? 0 : -1;
+        });
+        results[newIndex].focus();
+        activeIndex = newIndex;
+      }
+
+      results.forEach((result, index) => {
+        result.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowDown" && index < results.length - 1) {
+            updateSelection(index + 1);
+          }
+          if (e.key === "ArrowUp" && index > 0) {
+            updateSelection(index - 1);
+          }
+          if (e.key === "Enter") {
+            announce(`Selected ${result.textContent}. Ready to proceed.`);
+          }
+        });
+
+        result.addEventListener("click", () => {
+          updateSelection(index);
+          announce(`Selected ${result.textContent}. Ready to proceed.`);
+        });
+      });
+
+      /* Button stubs */
+      document.getElementById("listen-btn").onclick = () => {
+        addTranscriptLine("user", "Listening for preferences...");
+        announce("Listening for preferences.");
+      };
+
+      document.getElementById("scan-btn").onclick = () => {
+        announce("Scanning seats. Found 120 available seats.");
+      };
+
+      document.getElementById("recommend-btn").onclick = () => {
+        announce("Top three seat options updated.");
+        updateSelection(0);
+      };
+
+      const toggleBtn = document.getElementById("assistant-toggle-btn");
+
+      function togglePanel() {
+        const isOpen = panel.classList.toggle("active");
+        toggleBtn.setAttribute("aria-expanded", isOpen);
+        announce(
+          isOpen ? "Seat assistant activated." : "Seat assistant closed.",
+        );
+
+        if (isOpen) {
+          document.getElementById("listen-btn").focus();
+        } else {
+          toggleBtn.focus();
+        }
+      }
+
+      toggleBtn.addEventListener("click", togglePanel);
+
+      /* Update Alt+S handler to reuse togglePanel */
+      document.addEventListener("keydown", (e) => {
+        if (e.altKey && e.key.toLowerCase() === "s") {
+          e.preventDefault();
+          togglePanel();
+        }
+      });
+
+      /*Transcript helper */
+      const transcript = document.getElementById("transcript");
+
+      function addTranscriptLine(role, text) {
+        const line = document.createElement("div");
+        line.className = `transcript-line ${role}`;
+        line.textContent = `${role === "user" ? "User" : "Assistant"}: ${text}`;
+        transcript.appendChild(line);
+        transcript.scrollTop = transcript.scrollHeight;
+      }
+
+      /* High-contrast modee */
+      document.getElementById("high-contrast-toggle").onchange = (e) => {
+        panel.classList.toggle("high-contrast", e.target.checked);
+        announce(
+          e.target.checked
+            ? "High contrast mode enabled."
+            : "High contrast mode disabled.",
+        );
+      };
+    </script>
+  </body>
+</html>
