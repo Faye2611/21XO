@@ -1,4 +1,4 @@
-# [Product name]
+# SeatSense
 
 A browser-based, voice-driven AI assistant that helps users select optimal seats on ticket booking websites.
 
@@ -15,6 +15,7 @@ seat-assistant/
 ├─ extension/        # Browser extension code
 ├─ demo/             # Mock ticket site
 ├─ logic/            # Seat extraction & ranking
+├─ font/             # Fonts import
 ├─ voice/            # Speech recognition
 README.md
 
@@ -32,7 +33,7 @@ demo/mockVenue.html
 5. Select the `extension/` folder
 
 ### Step 3: Use the assistant
-- Press Alt+S to open panel
+- Press Alt+S or Voice Assistant button to open panel
 - Click "Scan Seats"
 - Click "Recommend"
 - Or press "Start Listening"
