@@ -293,10 +293,38 @@
         }
       });
 
-      function announce(message) {
-        status.textContent = message;
-        addTranscriptLine("assistant", message);
+      async function announce(text) {
+        if (!text) return;
+
+        // Update screen reader
+        const sr = document.getElementById("sr-status");
+        if (sr) {
+          sr.textContent = "";
+          setTimeout(() => (sr.textContent = text), 30);
+        }
+
+        // Wait for voices
+        await waitForVoices();
+
+        // Cancel previous speech
+        speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        // Optional tuning (safe defaults)
+        utterance.rate = 1;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+
+        addTranscriptLine("assistant", text);
+
+        speechSynthesis.speak(utterance);
       }
+
+      // function announce(message) {
+      //   status.textContent = message;
+      //   addTranscriptLine("assistant", message);
+      // }
 
       /* Keyboard navigation for results */
       function updateSelection(newIndex) {
@@ -423,6 +451,23 @@
 
       speechSynthesis.onvoiceschanged = loadVoices;
       loadVoices();
+      console.log(speechSynthesis.getVoices());
+
+      function waitForVoices() {
+        return new Promise((resolve) => {
+          let voices = speechSynthesis.getVoices();
+
+          if (voices.length) {
+            resolve(voices);
+            return;
+          }
+
+          speechSynthesis.onvoiceschanged = () => {
+            voices = speechSynthesis.getVoices();
+            resolve(voices);
+          };
+        });
+      }
     </script>
   </body>
 </html>
