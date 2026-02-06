@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Accessibility Seat Assistant</title>
+    <title>Seat Assistant</title>
     <style>
       :root {
         --bg: #0f172a;
@@ -14,17 +14,30 @@
       }
 
       @font-face {
-        font-family: "Dyslexie";
-        src: url("Dyslexie-Regular.woff2") format("woff2");
+        font-family: "OpenDyslexic";
+        src: url("../font/OpenDyslexic-Regular.otf") format("opentype");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
       }
 
-      #seat-assistant {
-        font-family: "Dyslexie", system-ui, sans-serif;
+      @font-face {
+        font-family: "OpenDyslexic";
+        src: url("../font/OpenDyslexic-Bold.otf") format("opentype");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
       }
 
       body {
         margin: 0;
-        font-family: system-ui, sans-serif;
+        font-family: "OpenDyslexic", system-ui, sans-serif;
+      }
+
+      #seat-assistant {
+        font-family: "OpenDyslexic", system-ui, sans-serif;
+        font-size: 12px;
+        line-height: 1.6;
       }
 
       #assistant-toggle-btn {
@@ -60,7 +73,7 @@
       }
 
       .large-ui button {
-        font-size: 18px;
+        font-size: 16px;
         padding: 16px;
       }
 
@@ -73,7 +86,7 @@
       #transcript {
         margin-top: 12px;
         padding: 8px;
-        max-height: 140px;
+        max-height: 50px;
         overflow-y: auto;
         background: #020617;
         border: 1px solid var(--border);
@@ -99,7 +112,7 @@
         position: fixed;
         top: 0;
         right: 0;
-        width: 360px;
+        width: 400px;
         height: 100vh;
         background: var(--panel);
         color: var(--text);
@@ -158,6 +171,7 @@
         border: 1px solid var(--border);
         border-radius: 6px;
         cursor: pointer;
+        font-size: 12px;
       }
 
       .result[aria-selected="true"] {
@@ -180,6 +194,14 @@
     </style>
   </head>
   <body>
+    <div
+      id="sr-status"
+      class="sr-only"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+
     <button
       id="assistant-toggle-btn"
       aria-controls="seat-assistant"
@@ -196,14 +218,15 @@
       aria-labelledby="assistant-title"
       aria-describedby="assistant-status"
     >
-      <h2 id="assistant-title">Accessibility Seat Assistant</h2>
+      <h2 id="assistant-title">Seat Assistant</h2>
 
       <section aria-labelledby="accessibility-settings">
-        <h3 id="accessibility-settings">Accessibility preferences</h3>
-
         <label>
           <input type="checkbox" id="high-contrast-toggle" />
           High contrast mode
+          <br />
+          <input type="checkbox" id="voice-toggle" checked />
+          Voice Assistant
         </label>
       </section>
 
@@ -356,7 +379,7 @@
         transcript.scrollTop = transcript.scrollHeight;
       }
 
-      /* High-contrast modee */
+      /* High-contrast mode */
       document.getElementById("high-contrast-toggle").onchange = (e) => {
         panel.classList.toggle("high-contrast", e.target.checked);
         announce(
@@ -365,6 +388,41 @@
             : "High contrast mode disabled.",
         );
       };
+
+      document.getElementById("voice-toggle").onchange = (e) => {
+        voiceSettings.enabled = e.target.checked;
+        announce(
+          e.target.checked
+            ? "Voice guidance enabled."
+            : "Voice guidance disabled.",
+        );
+      };
+
+      /* TTS - speech to text*/
+      const voiceSettings = {
+        enabled: true,
+        rate: 1,
+        pitch: 1,
+        volume: 1,
+      };
+
+      let selectedVoice = null;
+
+      /* Load voices safely (important: async in Chrome) */
+      function loadVoices() {
+        const voices = speechSynthesis.getVoices();
+
+        // Prefer clear English voices
+        selectedVoice =
+          voices.find(
+            (v) => v.lang.startsWith("en") && v.name.includes("Google"),
+          ) ||
+          voices.find((v) => v.lang.startsWith("en")) ||
+          voices[0];
+      }
+
+      speechSynthesis.onvoiceschanged = loadVoices;
+      loadVoices();
     </script>
   </body>
 </html>
