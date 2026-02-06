@@ -25,10 +25,6 @@
         font-weight: 600;
         letter-spacing: 0.2px;
       }
-      header .hint {
-        font-size: 12px;
-        opacity: 0.75;
-      }
       .wrap {
         display: grid;
         grid-template-columns: 1fr 320px;
@@ -135,9 +131,6 @@
   <body>
     <header>
       <h1>Mock Ticketing — Seat Selection</h1>
-      <div class="hint">
-        Tip: your extension can parse seats via <code>.seat</code> + <code>data-*</code>
-      </div>
     </header>
 
     <div class="wrap">
@@ -163,18 +156,9 @@
           <div class="chip"><span class="dot selected"></span> Selected highlight</div>
 
           <div class="info">
-            <div><b>Seat metadata:</b></div>
-            <div>
-              <code>data-section</code>, <code>data-row</code>, <code>data-seat</code>,
-              <code>data-price</code>, <code>data-status</code>, <code>data-tags</code>
-            </div>
-            <br />
-            <div><b>Tag examples:</b></div>
-            <div><code>aisle</code>, <code>obstructed</code>, <code>wheelchair</code>, <code>near_exit</code></div>
-            <br />
             <div><b>Pricing:</b></div>
-            <div>Front rows (near stage): higher</div>
-            <div>Section B: mid | Farther rows: cheaper</div>
+            <div>Front rows (near stage): higher-priced seats</div>
+            <div>Farther rows: lower-priced seats</div>
           </div>
         </div>
       </aside>
