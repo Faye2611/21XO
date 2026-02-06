@@ -8,7 +8,7 @@ let recognition;
 const LOW_CONFIDENCE_TOKEN = "__LOW_CONFIDENCE__"; // used to flag low-confidence transcripts
 
 // Starts the browser's speech recognition and calls onText(transcript)
-export function startListening(onText) {
+window.startListening = function () {
   const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -39,18 +39,25 @@ export function startListening(onText) {
 
     // Low-confidence detection
     if (confidence < 0.6) {
-      onText(LOW_CONFIDENCE_TOKEN);
+      if (window.onVoiceResult) {
+        const result = window.interpret("__LOW_CONFIDENCE__", window.currentWeights || {});
+        window.onVoiceResult(result);
+      }
       return;
     }
 
-    onText(finalText.trim().toLowerCase());
+    if (window.onVoiceResult) {
+      const result = window.interpret(finalText.trim().toLowerCase(), window.currentWeights || {});
+      window.onVoiceResult(result);
+    }
+
   };
 
   recognition.start();
 }
 
 // Stops ongoing speech recognition
-export function stopListening() {
+window.stopListening = function () {
   recognition?.stop();
 }
 
@@ -143,7 +150,7 @@ let lastCommandTime = 0;
  * - optional selection command
  * - assistantText to announce
  */
-export function interpret(text, prefState) {
+window.interpret = function (text, prefState) {
   if (text === LOW_CONFIDENCE_TOKEN) {
     return { assistantText: "I didn’t quite catch that. Please repeat." };
   }
@@ -219,4 +226,3 @@ function select(index) {
     assistantText: `Selecting option ${index}.`
   };
 }
-
