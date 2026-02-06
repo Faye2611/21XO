@@ -12,7 +12,7 @@ export function startListening(onText) {
     return;
   }
 
-  const recognition = new SpeechRecognition();
+  recognition = new SpeechRecognition();
   recognition.lang = "en-US";
   recognition.interimResults = false;
   recognition.continuous = false;
@@ -30,9 +30,27 @@ export function startListening(onText) {
   };
 
   recognition.onresult = (e) => {
-    console.log("Raw result:", e);
-    const text = e.results[0][0].transcript.trim().toLowerCase();
-    onText(text);
+    let finalText = "";
+    let confidence = 1;
+
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const result = e.results[i];
+      if (result.isFinal) {
+        finalText += result[0].transcript;
+        confidence = result[0].confidence ?? 1;
+      }
+    }
+
+    if (!finalText.trim()) return;
+
+    console.log("Final transcript:", finalText, "confidence:", confidence);
+
+    if (confidence < 0.6) {
+      onText("__LOW_CONFIDENCE__");
+      return;
+    }
+
+    onText(finalText.trim().toLowerCase());
   };
 
   recognition.onerror = (e) => {
@@ -60,18 +78,81 @@ function normalize(w) {
   return w;
 }
 
+// text normalization function
+function normalizeText(text) {
+  return text
+    .toLowerCase()
+    .replace(/nearer|nearest|close by/g, "closer")
+    .replace(/cheap|cheaper|less expensive/g, "under")
+    .replace(/walkway|side seat/g, "aisle")
+    .replace(/blocked view|blocked/g, "obstructed")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Intent definitions for sentence-level understanding
+const INTENTS = [
+  {
+    key: "distance",
+    phrases: ["closer", "near", "front", "close to stage"],
+    weight: 0.2
+  },
+  {
+    key: "centrality",
+    phrases: ["center", "central", "middle"],
+    weight: 0.2
+  },
+  {
+    key: "aisle",
+    phrases: ["aisle", "side seat", "easy access"],
+    weight: 0.2
+  },
+  {
+    key: "price",
+    phrases: ["cheap", "under", "not too expensive", "affordable"],
+    weight: 0.2
+  },
+  {
+    key: "avoidObstructed",
+    phrases: ["no obstruction", "clear view", "avoid obstructed", "unblocked"],
+    weight: 0.3
+  }
+];
+
+// soft negation
+function isNegated(text, phrase) {
+  const idx = text.indexOf(phrase);
+  if (idx === -1) return false;
+
+  const window = text.slice(Math.max(0, idx - 12), idx);
+  return /\bnot\b|\bno\b|\bavoid\b/.test(window);
+}
+
+// considering word intensity
+function intensityMultiplier(text) {
+  if (text.includes("very")) return 1.5;
+  if (text.includes("slightly") || text.includes("a bit")) return 0.7;
+  if (text.includes("not too")) return 0.5;
+  return 1;
+}
+
+
 // Interpreter
 
 let lastCommandText = null;
 let lastCommandTime = 0;
 
 export function interpret(text, prefState) {
-  text = text.toLowerCase();
+  if (text === "__LOW_CONFIDENCE__") {
+    return { announcement: "I didn’t quite catch that. Please repeat." };
+  }
+
+  text = normalizeText(text);
 
   const now = Date.now();
 
-  if (text === lastCommandText && now - lastCommandTime < 1500) {
-    return { announcement: "Command already applied" };
+  if (now - lastCommandTime < 1200) {
+    return { announcement: "Okay." };
   }
 
   lastCommandText = text;
@@ -91,33 +172,26 @@ export function interpret(text, prefState) {
       return select(3);
   }
 
-  // ---------- 2. PREFERENCE MODIFICATION ----------
+  // ---------- 2. SENTENCE-LEVEL PREFERENCE MODIFICATION ----------
   let w = { ...prefState };
   let changed = false;
+  const factor = intensityMultiplier(text);
 
-if (text.includes("closer") || text.includes("close")) {
-    w.distance += 0.2;
-    changed = true;
-  }
+  for (const intent of INTENTS) {
+    for (const phrase of intent.phrases) {
+      if (text.includes(phrase)) {
+        const delta = intent.weight * factor;
 
-  if (text.includes("center") || text.includes("central")) {
-    w.centrality += 0.2;
-    changed = true;
-  }
+        if (isNegated(text, phrase)) {
+          w[intent.key] -= delta * 0.5; // soft negation
+        } else {
+          w[intent.key] += delta;
+        }
 
-  if (text.includes("aisle")) {
-    w.aisle += 0.2;
-    changed = true;
-  }
-
-  if (text.includes("cheap") || text.includes("under")) {
-    w.price += 0.2;
-    changed = true;
-  }
-
-  if (text.includes("obstruct")) {
-    w.avoidObstructed += 0.3;
-    changed = true;
+        changed = true;
+        break; // avoid double-counting same intent
+      }
+    }
   }
 
   if (changed) {
