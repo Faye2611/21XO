@@ -277,14 +277,11 @@ function handleRecommend() {
     announce("Recommendations updated.");
     // announce each option sequentially with small delay so speech doesn't overlap
     top.forEach((s, i) => {
-      setTimeout(
-        () => {
-          announce(
-            `Option ${i + 1}: Section ${s.section}, Row ${s.row}, Seat ${s.seat}, ${s.price} dollars`,
-          );
-        },
-        6500 * (i + 1),
-      );
+      setTimeout(() => {
+        announce(
+          `Option ${i + 1}: Section ${s.section}, Row ${s.row}, Seat ${s.seat}, ${s.price} dollars`,
+        );
+      }, 6500 * i);
     });
   }
   //announce("Recommendations updated.");
