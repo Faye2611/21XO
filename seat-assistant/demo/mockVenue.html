@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -6,7 +6,12 @@
     <title>Mock Venue Seat Selection</title>
     <style>
       body {
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          sans-serif;
         margin: 0;
         background: #0b0f19;
         color: #e8eefc;
@@ -53,11 +58,19 @@
         border-radius: 50%;
         display: inline-block;
       }
-      .dot.avail { background: #6ee7b7; }
-      .dot.sold { background: #64748b; }
-      .dot.obstructed { background: #fb7185; }
-      .dot.selected { background: #fde047; }
-      
+      .dot.avail {
+        background: #6ee7b7;
+      }
+      .dot.sold {
+        background: #64748b;
+      }
+      .dot.obstructed {
+        background: #fb7185;
+      }
+      .dot.selected {
+        background: #fde047;
+      }
+
       .info {
         font-size: 12px;
         opacity: 0.85;
@@ -77,18 +90,25 @@
         border-radius: 14px;
         background: radial-gradient(
           1200px 600px at 50% 0%,
-          rgba(56, 189, 248, 0.10),
+          rgba(56, 189, 248, 0.1),
           rgba(255, 255, 255, 0.02)
         );
       }
       .seat {
         cursor: pointer;
-        stroke: rgba(255, 255, 255, 0.20);
+        stroke: rgba(255, 255, 255, 0.2);
         stroke-width: 1;
       }
-      .seat[data-status="available"] { fill: rgba(110, 231, 183, 0.92); }
-      .seat[data-status="sold"] { fill: rgba(100, 116, 139, 0.9); cursor: not-allowed; }
-      .seat[data-tags*="obstructed"] { fill: rgba(251, 113, 133, 0.92); }
+      .seat[data-status="available"] {
+        fill: rgba(110, 231, 183, 0.92);
+      }
+      .seat[data-status="sold"] {
+        fill: rgba(100, 116, 139, 0.9);
+        cursor: not-allowed;
+      }
+      .seat[data-tags*="obstructed"] {
+        fill: rgba(251, 113, 133, 0.92);
+      }
       .seat-selected {
         stroke: rgba(253, 224, 71, 1);
         stroke-width: 3;
@@ -122,8 +142,12 @@
       }
 
       @media (max-width: 920px) {
-        .wrap { grid-template-columns: 1fr; }
-        svg { height: 70vh; }
+        .wrap {
+          grid-template-columns: 1fr;
+        }
+        svg {
+          height: 70vh;
+        }
       }
     </style>
   </head>
@@ -138,11 +162,19 @@
         <svg id="seatmap" viewBox="0 0 1000 700" aria-label="Seat map">
           <rect id="stage-box" x="340" y="30" width="320" height="70"></rect>
           <text id="stage" x="500" y="72" text-anchor="middle">STAGE</text>
-          <text class="small" x="500" y="95" text-anchor="middle">(Speakers louder near front)</text>
+          <text class="small" x="500" y="95" text-anchor="middle">
+            (Speakers louder near front)
+          </text>
 
-          <text class="section-label" x="215" y="170" text-anchor="middle">SECTION A</text>
-          <text class="section-label" x="500" y="170" text-anchor="middle">SECTION B</text>
-          <text class="section-label" x="785" y="170" text-anchor="middle">SECTION C</text>
+          <text class="section-label" x="215" y="170" text-anchor="middle">
+            SECTION A
+          </text>
+          <text class="section-label" x="500" y="170" text-anchor="middle">
+            SECTION B
+          </text>
+          <text class="section-label" x="785" y="170" text-anchor="middle">
+            SECTION C
+          </text>
 
           <g id="seats"></g>
         </svg>
@@ -152,8 +184,12 @@
         <div class="legend">
           <div class="chip"><span class="dot avail"></span> Available</div>
           <div class="chip"><span class="dot sold"></span> Sold</div>
-          <div class="chip"><span class="dot obstructed"></span> Obstructed view</div>
-          <div class="chip"><span class="dot selected"></span> Selected highlight</div>
+          <div class="chip">
+            <span class="dot obstructed"></span> Obstructed view
+          </div>
+          <div class="chip">
+            <span class="dot selected"></span> Selected highlight
+          </div>
 
           <div class="info">
             <div><b>Pricing:</b></div>
@@ -193,9 +229,16 @@
 
         c.addEventListener("click", () => {
           if (c.getAttribute("data-status") !== "available") return;
-          document.querySelectorAll(".seat-selected").forEach((el) => el.classList.remove("seat-selected"));
+          document
+            .querySelectorAll(".seat-selected")
+            .forEach((el) => el.classList.remove("seat-selected"));
           c.classList.add("seat-selected");
-          console.log(`Selected: Section ${section} Row ${row} Seat ${seatNo} ($${price})`);
+          console.log(
+            `Selected: Section ${section} Row ${row} Seat ${seatNo} ($${price})`,
+          );
+          announce(
+            `Selected Section ${section}, Row ${row}, Seat ${seatNo}, Price $${price}`,
+          );
         });
 
         return c;
@@ -212,8 +255,20 @@
         const isAisle = seatNo === 1 || seatNo === seatsPerRow;
         if (isAisle) tags.push("aisle");
         if (rowIndex === rows.length - 1 && isAisle) tags.push("near_exit");
-        if (section === "B" && rowIndex === rows.length - 1 && seatNo >= 6 && seatNo <= 10) tags.push("wheelchair");
-        if (section === "C" && rowIndex >= 3 && rowIndex <= 5 && (seatNo === 14 || seatNo === 15)) tags.push("obstructed");
+        if (
+          section === "B" &&
+          rowIndex === rows.length - 1 &&
+          seatNo >= 6 &&
+          seatNo <= 10
+        )
+          tags.push("wheelchair");
+        if (
+          section === "C" &&
+          rowIndex >= 3 &&
+          rowIndex <= 5 &&
+          (seatNo === 14 || seatNo === 15)
+        )
+          tags.push("obstructed");
         return tags;
       }
 
@@ -238,7 +293,9 @@
             const sold = isSold({ section, rowIndex: r, seatNo });
             const status = sold ? "sold" : "available";
 
-            seatsGroup.appendChild(makeSeat({ cx, cy, section, row, seatNo, price, status, tags }));
+            seatsGroup.appendChild(
+              makeSeat({ cx, cy, section, row, seatNo, price, status, tags }),
+            );
           }
         }
       }
@@ -247,6 +304,5 @@
     </script>
 
     <script src="../content.js"></script>
-
   </body>
 </html>

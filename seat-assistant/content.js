@@ -1,17 +1,23 @@
-const isDemoFolder = window.location.pathname.includes('/demo/');
-const SCRIPT_BASE = isDemoFolder 
-  ? window.location.origin + window.location.pathname.replace(/\/demo\/.*$/, '') 
-  : window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
+const isDemoFolder = window.location.pathname.includes("/demo/");
+const SCRIPT_BASE = isDemoFolder
+  ? window.location.origin + window.location.pathname.replace(/\/demo\/.*$/, "")
+  : window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, "");
 
 const paths = {
   logic: `${SCRIPT_BASE}/logic`,
   voice: `${SCRIPT_BASE}/voice`,
-  panel: `${SCRIPT_BASE}/extension/assistantPanel.html`
+  panel: `${SCRIPT_BASE}/extension/assistantPanel.html`,
 };
 
-window.currentWeights = { distance: 0.25, centrality: 0.2, aisle: 0.2, price: 0.2, avoidObstructed: 0.15 };
+window.currentWeights = {
+  distance: 0.25,
+  centrality: 0.2,
+  aisle: 0.2,
+  price: 0.2,
+  avoidObstructed: 0.15,
+};
 window.allSeats = [];
-window.lastRecommendations = []; 
+window.lastRecommendations = [];
 
 function loadScript(path) {
   return new Promise((resolve) => {
@@ -93,7 +99,7 @@ function injectStyles() {
       font-family: "OpenDyslexic", system-ui, sans-serif !important;
       box-shadow: -5px 0 20px rgba(0,0,0,0.5); 
       display: none; 
-      overflow-y: auto;
+      overflow-y: hidden;
       box-sizing: border-box;
       line-height: 1.6;
     }
@@ -145,7 +151,7 @@ function injectStyles() {
     #transcript { 
       background: #020617; 
       border: 1px solid #334155; 
-      height: 110px; 
+      height: 80px; 
       overflow-y: auto; 
       padding: 10px; 
       margin: 10px 0; 
@@ -204,27 +210,33 @@ function injectStyles() {
 }
 
 function wirePanel() {
-  document.getElementById("scan-btn").onclick = () => {
-    window.allSeats = window.extractSeats ? window.extractSeats() : [];
+  window.allSeats = window.extractSeats ? window.extractSeats() : [];
+  setTimeout(() => {
     announce(`Scan complete. Found ${window.allSeats.length} available seats.`);
-  };
+  }, 1500); // delay function call by 1500ms
 
   document.getElementById("recommend-btn").onclick = handleRecommend;
 
   document.getElementById("listen-btn").onclick = () => {
     if (window.startListening) {
       announce("Listening for your preferences...");
-      
+
       setTimeout(() => {
         window.startListening();
-      }, 800);  // delay function call by 0.8ms
+      }, 800); // delay function call by 0.8ms
     }
   };
 
   document.getElementById("high-contrast-toggle").onchange = (e) => {
     const isEnabled = e.target.checked;
-    document.getElementById("seat-assistant").classList.toggle("high-contrast", isEnabled);
-    announce(isEnabled ? "High contrast mode enabled." : "High contrast mode disabled.");
+    document
+      .getElementById("seat-assistant")
+      .classList.toggle("high-contrast", isEnabled);
+    announce(
+      isEnabled
+        ? "High contrast mode enabled."
+        : "High contrast mode disabled.",
+    );
   };
 
   document.getElementById("voice-toggle").onchange = (e) => {
@@ -236,18 +248,44 @@ function wirePanel() {
 
 function handleRecommend() {
   if (!window.rankSeats) return announce("Ranking logic not loaded.");
-  const stage = window.getStageAnchor ? window.getStageAnchor() : { x: 500, y: 65 };
-  const top = window.topNSeats(window.allSeats, window.currentWeights, stage, 3);
-  
+  const stage = window.getStageAnchor
+    ? window.getStageAnchor()
+    : { x: 500, y: 65 };
+  const top = window.topNSeats(
+    window.allSeats,
+    window.currentWeights,
+    stage,
+    3,
+  );
+
   window.lastRecommendations = top;
 
   const list = document.querySelector(".results");
   if (list) {
-    list.innerHTML = top.length ? top.map((s, i) => `
-      <div class="result" onclick="window.selectSeatById('${s.id}')">
+    list.innerHTML = top.length
+      ? top
+          .map(
+            (s, i) => `
+      <div class="result" role="option" tabindex="0" aria-label="Option ${i + 1}: Section ${s.section}, Row ${s.row}, Seat ${s.seat}, $${s.price}" onclick="window.selectSeatById('${s.id}')">
         Option ${i + 1}: Sec ${s.section}, Row ${s.row}, Seat ${s.seat} ($${s.price})
       </div>
-    `).join('') : '<div class="result">No results found.</div>';
+    `,
+          )
+          .join("")
+      : '<div class="result" role="option" tabindex="0" aria-label="No results found">No results found.</div>';
+    // announce recommendations and each option for screen-reader / voice feedback
+    announce("Recommendations updated.");
+    // announce each option sequentially with small delay so speech doesn't overlap
+    top.forEach((s, i) => {
+      setTimeout(
+        () => {
+          announce(
+            `Option ${i + 1}: Section ${s.section}, Row ${s.row}, Seat ${s.seat}, ${s.price} dollars`,
+          );
+        },
+        6500 * (i + 1),
+      );
+    });
   }
   //announce("Recommendations updated.");
 }
@@ -263,12 +301,13 @@ async function init() {
     font-size: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.4);
     transition: transform 0.2s, background 0.2s;
   `;
-  
-  btn.onmouseover = () => btn.style.transform = "translateX(-50%) scale(1.05)";
-  btn.onmouseout = () => btn.style.transform = "translateX(-50%) scale(1)";
 
-  btn.onclick = async () => { 
-    await injectPanel(); 
+  btn.onmouseover = () =>
+    (btn.style.transform = "translateX(-50%) scale(1.05)");
+  btn.onmouseout = () => (btn.style.transform = "translateX(-50%) scale(1)");
+
+  btn.onclick = async () => {
+    await injectPanel();
     const panel = document.getElementById("seat-assistant");
     if (panel.classList.toggle("active")) announce("Seat assistant activated.");
   };
@@ -278,7 +317,7 @@ async function init() {
     loadScript(`${paths.logic}/extractSeats.js`),
     loadScript(`${paths.logic}/rankSeats.js`),
     loadScript(`${paths.logic}/selectSeat.js`),
-    loadScript(`${paths.voice}/voice.js`)
+    loadScript(`${paths.voice}/voice.js`),
   ]);
 }
 
@@ -293,7 +332,9 @@ async function injectPanel() {
     div.innerHTML = html;
     document.body.appendChild(div);
     wirePanel();
-  } catch (e) { console.error(e); }
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 window.onVoiceResult = (res) => {
@@ -305,11 +346,14 @@ window.onVoiceResult = (res) => {
   }
 
   if (res.command && res.command.type === "select") {
-    const index = res.command.index - 1; 
-    const seat = window.lastRecommendations && window.lastRecommendations[index];
-    
+    const index = res.command.index - 1;
+    const seat =
+      window.lastRecommendations && window.lastRecommendations[index];
+
     if (seat && window.selectSeatById) {
       window.selectSeatById(seat.id);
+      // announce programmatic selection
+      announce(`Option ${index + 1} selected`);
     }
   }
 };
