@@ -214,7 +214,10 @@ function wirePanel() {
   document.getElementById("listen-btn").onclick = () => {
     if (window.startListening) {
       announce("Listening for your preferences...");
-      window.startListening();
+      
+      setTimeout(() => {
+        window.startListening();
+      }, 800);  // delay function call by 0.8ms
     }
   };
 
@@ -246,7 +249,7 @@ function handleRecommend() {
       </div>
     `).join('') : '<div class="result">No results found.</div>';
   }
-  announce("Recommendations updated.");
+  //announce("Recommendations updated.");
 }
 
 async function init() {

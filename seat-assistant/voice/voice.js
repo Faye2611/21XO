@@ -142,7 +142,7 @@ window.interpret = function (text, prefState) {
   if (matchedIntents.length) {
     return {
       weights: normalizeWeights(updated),
-      assistantText: "Got it. Preferences updated."
+      assistantText: "Got it. Recommendations updated."
     };
   }
 
