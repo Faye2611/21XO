@@ -29,10 +29,37 @@ function loadScript(path) {
   });
 }
 
+let speechQueue = [];
+let isSpeaking = false;
+
 function speak(text) {
   if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
+
+  speechQueue.push(text);
+
+  if (!isSpeaking) {
+    processSpeechQueue();
+  }
+}
+
+function processSpeechQueue() {
+  if (speechQueue.length === 0) {
+    isSpeaking = false;
+    return;
+  }
+
+  isSpeaking = true;
+  const text = speechQueue.shift();
   const msg = new SpeechSynthesisUtterance(text);
+
+  msg.onend = () => {
+    processSpeechQueue();
+  };
+
+  msg.onerror = () => {
+    processSpeechQueue();
+  };
+
   window.speechSynthesis.speak(msg);
 }
 
@@ -59,6 +86,13 @@ function announce(text) {
 
 function forceAnnounce(text) {
   updateUI(text);
+
+  if (!window.speechSynthesis) return;
+
+  speechQueue = [];
+  window.speechSynthesis.cancel();
+  isSpeaking = false;
+
   speak(text);
 }
 
@@ -287,7 +321,6 @@ function handleRecommend() {
       );
     });
   }
-  //announce("Recommendations updated.");
 }
 
 async function init() {

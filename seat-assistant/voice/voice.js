@@ -142,7 +142,7 @@ window.interpret = function (text, prefState) {
   if (matchedIntents.length) {
     return {
       weights: normalizeWeights(updated),
-      assistantText: "Got it. Recommendations updated."
+      //assistantText: "Got it. Recommendations updated."
     };
   }
 
@@ -154,6 +154,6 @@ window.interpret = function (text, prefState) {
 function select(index) {
   return {
     command: { type: "select", index },
-    assistantText: `Selecting option ${index}.`
+    //assistantText: `Selecting option ${index}.`
   };
 }
