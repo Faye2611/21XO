@@ -266,6 +266,12 @@ function wirePanel() {
     document
       .getElementById("seat-assistant")
       .classList.toggle("high-contrast", isEnabled);
+    // Also apply high-contrast to the underlying page (mock venue)
+    try {
+      document.body.classList.toggle("high-contrast", isEnabled);
+    } catch (err) {
+      // ignore if not applicable
+    }
     announce(
       isEnabled
         ? "High contrast mode enabled."
@@ -329,7 +335,7 @@ async function init() {
     z-index: 2000000; padding: 18px 45px; background: #6366f1; color: white; 
     border: none; border-radius: 50px; cursor: pointer; font-weight: bold; 
     font-size: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-    transition: transform 0.2s, background 0.2s;
+    transition: transform 0.2s, background 0.2s; font-family: OpenDyslexic, system-ui, sans-serif;
   `;
 
   btn.onmouseover = () =>

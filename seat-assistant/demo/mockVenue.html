@@ -5,8 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mock Venue Seat Selection</title>
     <style>
+      /* Load OpenDyslexic from local font folder */
+      @font-face {
+        font-family: "OpenDyslexic";
+        src: url("../font/OpenDyslexic-Regular.otf") format("opentype");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "OpenDyslexic";
+        src: url("../font/OpenDyslexic-Bold.otf") format("opentype");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+
       body {
+        /* prefer OpenDyslexic when available for readability */
         font-family:
+          OpenDyslexic,
           system-ui,
           -apple-system,
           Segoe UI,
@@ -94,6 +112,39 @@
           rgba(255, 255, 255, 0.02)
         );
       }
+
+      /* High contrast mode for the mock venue */
+      body.high-contrast {
+        background: #000000 !important;
+        color: #ffffff !important;
+      }
+
+      body.high-contrast svg {
+        background: #000000 !important;
+        border: 2px solid #ffffff;
+      }
+
+      body.high-contrast .seat[data-status="available"] {
+        fill: #1aff1a !important; /* bright green */
+      }
+      body.high-contrast .seat[data-status="sold"] {
+        fill: #666666 !important;
+        cursor: not-allowed;
+      }
+      body.high-contrast .seat[data-tags*="obstructed"] {
+        fill: #ff0044 !important;
+      }
+      body.high-contrast .seat-selected {
+        stroke: #000000 !important;
+        stroke-width: 4px !important;
+        filter: none !important;
+        fill: #00ffff !important;
+      }
+
+      body.high-contrast #stage {
+        fill: #ffffff !important;
+      }
+
       .seat {
         cursor: pointer;
         stroke: rgba(255, 255, 255, 0.2);
